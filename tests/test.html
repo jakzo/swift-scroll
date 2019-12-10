@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>SwiftScroll Tests</title>
+    <script src="../lib/swift-scroll.js"></script>
+    <script>
+      window.addEventListener('load', function (e) {
+        testArea = document.getElementById('testarea');
+        Util.teardown();
+        runAllTests();
+      }, false);
+
+      var testArea, pane,
+          DOM = window._swiftScroll.overiddenDOMProperties,
+          categories = [],
+          allTests = [],
+          currentCategory,
+          currentTest;
+      function runAllTests() {
+
+        // Clear test displays
+        var testDisplay = document.getElementById('results');
+        while (DOM.firstChild.get.call(testDisplay)) {
+          DOM.removeChild.value.call(testDisplay, DOM.firstChild.get.call(testDisplay));
+        }
+        for (var i = 0; i < categories.length; i++) {
+          categories[i].clear();
+          DOM.appendChild.value.call(testDisplay, categories[i].display);
+        }
+
+        // Run the tests
+        currentCategory = -1;
+        function nextTest() {
+          if (++currentCategory < categories.length) {
+            categories[currentCategory].run(nextTest);
+          }
+        }
+        nextTest();
+      }
+
+      function assert(success, message) {
+        if (!success) {
+          currentTest.failed = true;
+          categories[currentCategory].addMessage(message, 'fail');
+        }
+      }
+
+      function Test(categoryName, name, testCode) {
+        this.category = null;
+        for (var i = 0; i < categories.length; i++) {
+          if (categories[i].name == categoryName) {
+            this.category = categories[i];
+            break;
+          }
+        }
+        if (!this.category) this.category = new Category(categoryName);
+        this.name = name;
+        this.testCode = testCode;
+        this.failed = false;
+        allTests.push(this);
+        this.category.tests.push(this);
+      }
+      Test.prototype = {
+        run: function (callback) {
+          var self = this, success;
+          currentTest = this;
+          try {
+            this.testCode();
+          } catch (e) {
+            this.failed = true;
+            this.category.addMessage('Error occurred while testing', 'fail');
+          }
+          Util.teardown();
+          callback();
+        }
+      };
+
+      function Category(name) {
+        this.display = document.createElement('div');
+        this.display.className = 'category';
+        var title = document.createElement('span');
+        this.failText = document.createElement('span');
+        this.failText.style.display = 'none';
+        this.detailsDisplay = document.createElement('div');
+        this.ranDisplay = document.createTextNode('0');
+        this.totalDisplay = document.createTextNode('0');
+        this.failedDisplay = document.createTextNode('0');
+        DOM.appendChild.value.call(title, document.createTextNode(name + ' ('));
+        DOM.appendChild.value.call(title, this.ranDisplay);
+        DOM.appendChild.value.call(title, document.createTextNode('/'));
+        DOM.appendChild.value.call(title, this.totalDisplay);
+        DOM.appendChild.value.call(title, document.createTextNode(') '));
+        DOM.appendChild.value.call(this.failText, this.failedDisplay);
+        DOM.appendChild.value.call(this.failText, document.createTextNode(' failed'));
+        DOM.appendChild.value.call(this.display, title);
+        DOM.appendChild.value.call(this.display, this.failText);
+        DOM.appendChild.value.call(this.display, this.detailsDisplay);
+
+        this.name = name;
+        this.tests = [];
+        this.ran = 0;
+        this.failed = 0;
+        categories.push(this);
+      }
+      Category.prototype = {
+        run: function (callback) {
+          this.ran = 0;
+          this.failed = 0;
+          this.display.className = 'category testing';
+          this.updateDisplay();
+          var self = this,
+              i = -1;
+          function nextTest() {
+            if (++i < self.tests.length) {
+              var test = self.tests[i];
+              test.run(nextTest);
+              self.testFinished(test);
+            } else callback();
+          }
+          nextTest();
+        },
+        testFinished: function (test) {
+          ++this.ran;
+          if (test.failed) ++this.failed;
+          this.updateDisplay();
+        },
+        updateDisplay: function () {
+          this.totalDisplay.data = this.tests.length + '';
+            this.ranDisplay.data = this.ran + '';
+          if (this.ran == this.tests.length) {
+            var className = 'category done';
+            if (this.failed == 0) className += ' passed';
+            else className += ' failed';
+            this.display.className = className;
+          }
+          if (this.failed != 0) {
+            this.failedDisplay.data = this.failed + '';
+            this.failText.style.display = '';
+          }
+          else this.failText.style.display = 'none';
+        },
+        addMessage: function (message, status) {
+          var container = document.createElement('div');
+          container.className = status;
+          container.textContent = message;
+          DOM.appendChild.value.call(this.detailsDisplay, container);
+        },
+        clear: function () {
+          this.ran = 0;
+          this.failed = 0;
+          var childNodes = DOM.childNodes.get.call(this.detailsDisplay);
+          while (childNodes.length != 0) {
+            DOM.removeChild.value.call(this.detailsDisplay, childNodes[0]);
+          }
+          this.display.className = 'category';
+          this.updateDisplay();
+        }
+      };
+
+      var Util = {
+        setup: function (prefilledNodes) {
+          Util.teardown();
+          var ss = new SwiftScroll({ container: pane });
+          for (var i = 0; i < prefilledNodes; i++) {
+            var node = document.createElement('p');
+            node.textContent = Util.sampleText;
+            ss.append(node);
+          }
+          return { testArea: testArea, container: pane, ss: ss };
+        },
+        teardown: function () {
+          var childNodes = DOM.childNodes.get.call(testArea);
+          while (childNodes.length != 0) {
+            DOM.removeChild.value.call(testArea, childNodes[0]);
+          }
+          pane = document.createElement('div');
+          pane.id = 'pane';
+          DOM.appendChild.value.call(testArea, pane);
+        },
+        sampleText: [
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+          'Morbi non nunc ut nulla porta malesuada.',
+          'Pellentesque fringilla placerat neque id lacinia.',
+          'Mauris sodales nunc quis leo venenatis dictum.',
+          'Donec dui felis, faucibus nec varius nec, lobortis id massa.',
+          'Fusce vitae magna tincidunt, accumsan odio at, suscipit justo.',
+          'Aenean venenatis eros vel massa eleifend posuere.',
+          'Sed vitae sapien orci.',
+          'Nunc hendrerit eros id neque faucibus, eget rhoncus ligula euismod.',
+          'Praesent egestas posuere neque egestas aliquet.',
+          'Nunc id metus porta sapien congue accumsan interdum a tortor.',
+          'Morbi hendrerit quis sapien ut aliquet.',
+          'Fusce tincidunt interdum est.',
+          'Cras sed elit rhoncus, eleifend turpis nec, pharetra libero.',
+          'Cras sodales, leo eget pretium varius, purus purus suscipit lacus,',
+          'et egestas nulla arcu in mi.',
+          'Vestibulum porttitor lobortis urna non sodales.',
+          'Phasellus lacinia erat hendrerit nisl blandit,',
+          'non facilisis orci viverra.'
+        ].join(' ')
+      };
+    </script>
+    <script src="dom.js"></script>
+    <style>
+      html, body {
+        font-family: sans-serif;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #results {
+        position: fixed;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 400px;
+        height: 100%;
+        z-index: 9999999;
+        background-color: #eee;
+        border: 1px solid #ccc;
+      }
+      #pane {
+        margin: 16px;
+        border: 1px solid #999;
+        background-color: #eee;
+        overflow: auto;
+        height: 500px;
+        width: 500px;
+
+        -webkit-overflow-scrolling: touch;
+
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        -moz-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        -o-transform: translateZ(0);
+      }
+
+      .category {
+        padding: 4px;
+        margin-bottom: 8px;
+      }
+      .category.testing {
+        opacity: 0.5;
+      }
+      .category.passed {
+        color: #393;
+      }
+      .category.failed {
+        color: #933;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SwiftScroll Tests</h1>
+    <div id="results"></div>
+    <div id="testarea"></div>
+  </body>
+</html>
