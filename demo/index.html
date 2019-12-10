@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>SwiftScroll Demo</title>
+    <script src="./swift-scroll.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+      #pane {
+        border: 1px solid #999;
+        background-color: #eee;
+        overflow: auto;
+        height: 500px;
+
+        -webkit-overflow-scrolling: touch;
+
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        -moz-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        -o-transform: translateZ(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>SwiftScroll Demo</h1>
+      <p>
+        The pane below contains lots of DOM nodes. Loading the page without
+        using SwiftScroll will cause it to be unusable on most devices and
+        browsers. It is also editable, to simulate DOM modifications.
+      </p>
+      <div id="pane" contenteditable="true"></div>
+    </div>
+    <script>
+      var pane = document.getElementById("pane"),
+        swiftScroll = new SwiftScroll({ container: pane }),
+        totalParagraphs = 10000;
+      for (var i = 0; i < totalParagraphs; i++) {
+        var paragraph = document.createElement("p");
+        paragraph.textContent = [
+          "Paragraph " + (i + 1) + " of " + totalParagraphs + ".",
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+          "Morbi non nunc ut nulla porta malesuada.",
+          "Pellentesque fringilla placerat neque id lacinia.",
+          "Mauris sodales nunc quis leo venenatis dictum.",
+          "Donec dui felis, faucibus nec varius nec, lobortis id massa.",
+          "Fusce vitae magna tincidunt, accumsan odio at, suscipit justo.",
+          "Aenean venenatis eros vel massa eleifend posuere.",
+          "Sed vitae sapien orci.",
+          "Nunc hendrerit eros id neque faucibus, eget rhoncus ligula euismod.",
+          "Praesent egestas posuere neque egestas aliquet.",
+          "Nunc id metus porta sapien congue accumsan interdum a tortor.",
+          "Morbi hendrerit quis sapien ut aliquet.",
+          "Fusce tincidunt interdum est.",
+          "Cras sed elit rhoncus, eleifend turpis nec, pharetra libero.",
+          "Cras sodales, leo eget pretium varius, purus purus suscipit lacus,",
+          "et egestas nulla arcu in mi.",
+          "Vestibulum porttitor lobortis urna non sodales.",
+          "Phasellus lacinia erat hendrerit nisl blandit,",
+          "non facilisis orci viverra."
+        ].join(" ");
+        pane.append(paragraph);
+      }
+    </script>
+  </body>
+</html>
